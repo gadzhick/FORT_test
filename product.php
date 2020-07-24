@@ -4,49 +4,79 @@
         if (is_numeric($formData['id'])){
             $product = get_product_by_id($formData['id'], $pdo);
             $result = array();
+
+            if (!isset($product['message'])) {
 //            foreach ($product as $key=>$value){
 //                $result[$key]=$value;
 //            }
 //            unset($result['queryString']);
-            $result['id']=$product->id;
-            $result['name']=$product->name;
-            $result['price']=$product->price;
-            $result['description']=$product->description;
-            echo json_encode($result, JSON_UNESCAPED_UNICODE);
+                $result['id']=$product->id;
+                $result['name']=$product->name;
+                $result['price']=$product->price;
+                $result['description']=$product->description;
+
+                    sendResponse($result, 200, '');
+            } else {
+
+                sendResponse('',404, $product['message']);
+            }
         }
-        return "Wrong ID";
+        sendResponse('', 401, 'ID isn`t numeric');
     }
 
     elseif ($method === "GET" && (isset($formData['name']) || isset($formData['description']))){
         $searchString = array();
-        $result=array();
+        $result = array();
         foreach ($formData as $key=>$value){
             $searchString[$key]=$value;
             $value=urldecode($value);
         }
         $products = search_product($searchString, $pdo);
-        foreach ($products as $key=>$value){
-            $result[$key]=$value;
+        if (!isset($product['message'])) {
+            foreach ($products as $key=>$value){
+                $result[$key]=$value;
+            }
+            sendResponse($result, 200, '');
         }
-        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        else {
+
+            sendResponse('',404,$products['message']);
+        }
     }
 
     elseif ($method === "GET" && (!isset($formData['name']) || !isset($formData['description']) || !isset($formData['id']))){
         $products = get_products($pdo);
-        $result=array();
-        foreach ($products as $key=>$value){
+        $result = array();
+        if (!isset($product['message'])) {
+            foreach ($products as $key=>$value){
                 $result[$key]=$value;
             }
-        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+            sendResponse($result, 200, '');
+        } else {
+
+            sendResponse('',404,$product['message']);
+        }
     }
 
     elseif ($method === "POST" && isset($formData)){
         $id = add_product($formData, $pdo);
-        echo json_encode(array('message'=>'Successfull add product with id '.$id));
+        if (!isset($product['message'])) {
+            sendResponse(array('id'=>$id), 200, '');
+        } else {
+            sendResponse('',404,$product['message']);
+        }
     }
 
     elseif ($method === "DELETE" && isset($formData['id'])){
-        delete_product($formData['id'], $pdo);
-        echo json_encode(array('message'=>'Successfull delete product with id '.$formData['id']));
+        if (is_numeric($formData['id'])) {
+            delete_product($formData['id'], $pdo);
+            if (!isset($product['message'])) {
+                sendResponse(array('id' => $formData['id']), 200, '');
+            } else {
+                sendResponse('', 404, $product['message']);
+            }
+        } else sendResponse('', 401, 'ID isn`t numeric');
     }
+
+    else sendResponse('', 401,"Bad Request");
 

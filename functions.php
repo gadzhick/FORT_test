@@ -1,14 +1,21 @@
 <?php
     function get_product_by_id($id, $pdo){
         $stmt = $pdo->prepare("SELECT * FROM product WHERE id=?");
-        $stmt->execute([$id]);
+        try {
+            $stmt->execute([$id]);
+        } catch (PDOException $e){
+            return array('message'=>$e);
+        }
         return $stmt->fetch(PDO::FETCH_LAZY);
     }
 
     function get_products($pdo){
         $stmt = $pdo->prepare("SELECT * FROM product");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
+        try {
+            $stmt->execute();
+        } catch (PDOException $e){
+            return array('message'=>$e);
+        }        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
     function add_product($data, $pdo){
@@ -16,13 +23,21 @@
         $stmt->bindParam(':name', $data['name']);
         $stmt->bindParam(':price', $data['price']);
         $stmt->bindParam(':description', $data['description']);
-        $stmt->execute();
+        try {
+            $stmt->execute();
+        } catch (PDOException $e){
+            return array('message'=>$e);
+        }
         return $pdo->lastInsertId();
     }
 
     function delete_product($id, $pdo){
         $stmt = $pdo->prepare("DELETE FROM product WHERE id=?");
-        $stmt -> execute([$id]);
+        try {
+            $stmt->execute([$id]);
+        } catch (PDOException $e){
+            return array('message'=>$e);
+        }
     }
 
     function search_product($searchString, $pdo){
@@ -49,7 +64,11 @@
             }
         }
 
-        $stmt->execute();
+        try {
+            $stmt->execute();
+        } catch (PDOException $e){
+            return array('message'=>$e);
+        }
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
@@ -62,10 +81,6 @@
             case 404:
                 header ('HTTP/1.0 404 Not Found');
                 $result = array('error'=> $message);
-                break;
-            case 401:
-                header('HTTP/1.0 401 Unauthorized');
-                $result = array('error' => $message);
                 break;
         }
         echo json_encode(array($result, JSON_UNESCAPED_UNICODE));
