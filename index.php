@@ -1,4 +1,8 @@
 <?php
+header('Content-Type: application/json; charset=utf-8');
+include "connect.php";
+$method = $_SERVER['REQUEST_METHOD'];
+$formData = getFormData($method);
 
 $method = $_SERVER['REQUEST_METHOD'];
 $formData = getFormData($method);
@@ -9,7 +13,6 @@ function getFormData($method) {
 
     $data = array();
     $exploded = explode('&', file_get_contents('php://input'));
-
     foreach ($exploded as $pair) {
         $item = explode('=', $pair);
         if (count($item) == 2) {
@@ -23,8 +26,9 @@ function getFormData($method) {
 $uri = $_SERVER['REQUEST_URI'];
 $uri = rtrim($uri, '/');
 
-$uri = str_replace($_SERVER['QUERY_STRING'], '', $uri);
-
+if (isset($_SERVER['QUERY_STRING'])) {
+    $uri = str_replace($_SERVER['QUERY_STRING'], '', $uri);
+}
 $uri = explode('/', $uri);
 $router = $uri[1];
 $router = str_replace('?', '', $router);

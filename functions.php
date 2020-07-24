@@ -6,9 +6,9 @@
     }
 
     function get_products($pdo){
-        $stmt = $pdo->prepare("SELECT * FROM product WHERE 1");
+        $stmt = $pdo->prepare("SELECT * FROM product");
         $stmt->execute();
-        return $stmt->fecth(PDO::FETCH_OBJ);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
     function add_product($data, $pdo){
@@ -17,6 +17,7 @@
         $stmt->bindParam(':price', $data['price']);
         $stmt->bindParam(':description', $data['description']);
         $stmt->execute();
+        return $pdo->lastInsertId();
     }
 
     function delete_product($id, $pdo){
@@ -29,7 +30,7 @@
         foreach ($searchString as $key=>$value){
             if($key === "name" OR $key === "description"){
                 array_push($query, "$key LIKE :$key");
-                $value = "%$value%";
+                $searchString[$key] = "%".$value."%";
             }
         }
         if (count($query)>1){
@@ -49,5 +50,23 @@
         }
 
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_OBJ);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    function sendResponse ($result, $httpCode, $message){
+        switch ($httpCode){
+            case 400:
+                header ('HTTP/1.0 400 Bad Request');
+                $result = array('error'=>$message);
+                break;
+            case 404:
+                header ('HTTP/1.0 404 Not Found');
+                $result = array('error'=> $message);
+                break;
+            case 401:
+                header('HTTP/1.0 401 Unauthorized');
+                $result = array('error' => $message);
+                break;
+        }
+        echo json_encode(array($result, JSON_UNESCAPED_UNICODE));
     }
