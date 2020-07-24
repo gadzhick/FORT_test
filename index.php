@@ -1,4 +1,7 @@
 <?php
+/**
+ * Файл с роутингом
+ */
 header('Content-Type: application/json; charset=utf-8');
 include "connect.php";
 $method = $_SERVER['REQUEST_METHOD'];

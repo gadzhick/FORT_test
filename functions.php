@@ -1,4 +1,13 @@
 <?php
+/**
+ * Функция получения продукта по ID
+ * @param $id
+ * Идентификатор продукта
+ * @param $pdo
+ * Объект подключения к БД
+ * @return Exception[]|PDOException[]  ошибка при работе с БД
+ * @return Object объект с ответом
+ */
     function get_product_by_id($id, $pdo){
         $stmt = $pdo->prepare("SELECT * FROM product WHERE id=?");
         try {
@@ -9,15 +18,32 @@
         return $stmt->fetch(PDO::FETCH_LAZY);
     }
 
+/**
+ * Функция получения всех продуктов
+ * @param $pdo
+ * Объект подключения к БД
+ * @return Exception[]|PDOException[] ошибка при работе с БД
+ * @return Object объект с ответом
+ */
     function get_products($pdo){
         $stmt = $pdo->prepare("SELECT * FROM product");
         try {
             $stmt->execute();
         } catch (PDOException $e){
             return array('message'=>$e);
-        }        return $stmt->fetchAll(PDO::FETCH_OBJ);
+        }
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
+/**
+ * Функция добавления продукта
+ * @param $data
+ * Массив с данными для добавления
+ * @param $pdo
+ * Объект подключения к БД
+ * @return Exception[]|PDOException[] ошибка при работе с БД
+ * @return int ID нового продукта
+ */
     function add_product($data, $pdo){
         $stmt = $pdo -> prepare("INSERT product SET name=:name, price=:price, description=:description");
         $stmt->bindParam(':name', $data['name']);
@@ -31,6 +57,15 @@
         return $pdo->lastInsertId();
     }
 
+/**
+ * Функция удаления продукта
+ * @param $id
+ * Идентификатор продукта
+ * @param $pdo
+ * Объект подключения к БД
+ * @return Exception[]|PDOException[]  ошибка при работе с БД
+ * @return int
+ */
     function delete_product($id, $pdo){
         $stmt = $pdo->prepare("DELETE FROM product WHERE id=?");
         try {
@@ -38,8 +73,18 @@
         } catch (PDOException $e){
             return array('message'=>$e);
         }
+        return 1;
     }
 
+/**
+ * Функция поиска продукта
+ * @param $searchString
+ * Массив с данными для поиска
+ * @param $pdo
+ * Объект подключения к БД
+ * @return Exception[]|PDOException[] ошибка при работе с БД
+ * @return Object объект с ответом
+ */
     function search_product($searchString, $pdo){
         $query=array();
         foreach ($searchString as $key=>$value){
@@ -72,6 +117,16 @@
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
+/**
+ * Функция отправки запроса
+ *
+ * @param $result
+ * Ответ сервера при успешном запросе
+ * @param $httpCode
+ * Код ответа сервера
+ * @param $message
+ * Сообщение при ошибке
+ */
     function sendResponse ($result, $httpCode, $message){
         switch ($httpCode){
             case 400:

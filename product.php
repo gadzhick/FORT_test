@@ -1,5 +1,10 @@
 <?php
     include "functions.php";
+/**
+ * Выбор условий
+ *
+ * В зависимости от метода запроса и входных данных ПО выдаст разные значения
+ */
     if($method === "GET" && isset($formData['id'])){
         if (is_numeric($formData['id'])){
             $product = get_product_by_id($formData['id'], $pdo);
@@ -69,7 +74,7 @@
 
     elseif ($method === "DELETE" && isset($formData['id'])){
         if (is_numeric($formData['id'])) {
-            delete_product($formData['id'], $pdo);
+          $product = delete_product($formData['id'], $pdo);
             if (!isset($product['message'])) {
                 sendResponse(array('id' => $formData['id']), 200, '');
             } else {
